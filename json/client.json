@@ -1,0 +1,6 @@
+{
+    "grantType": "client_credentials",
+    "clientId": "YbUCPtmlH2ByjWDmuFFxnRxSGk7vJv1a",
+    "clientSecret": "6ZklGJc1rAYAqiFd",
+    "publish_url": "https://api.ce-cotoha.com/v1/oauth/accesstokens"
+}

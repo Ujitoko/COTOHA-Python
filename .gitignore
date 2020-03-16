@@ -130,9 +130,5 @@ dmypy.json
 
 # add
 *.code-workspace
-<<<<<<< HEAD
-.vscode
-=======
 .vscode
 json/
->>>>>>> Initial commit

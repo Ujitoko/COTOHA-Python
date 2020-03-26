@@ -38,8 +38,10 @@ class Auth(object):
         Returns:
             str: クラス概要.
         """
-        return 'base_url:{0}\nlimit_time:{1}\ntoken:{2}\n'\
-            .format(self.base_url, self.limit_time, self.token)
+        string = 'base_url:{}\n'.format(self.base_url)
+        string += 'limit_time:{}\n'.format(self.limit_time)
+        string += 'token:{}\n'.format(self.token)
+        return string
 
     def check_token(self) -> bool:
         """
@@ -57,7 +59,7 @@ class Auth(object):
 
     def update_token(self) -> None:
         """アクセストークンの更新を行う.
-        
+
         Raises:
             AuthError: 通信エラーがある場合.オフラインの場合など.
             AuthError: client.jsonに問題がある場合.keyが間違っている場合など.

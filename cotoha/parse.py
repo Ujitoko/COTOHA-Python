@@ -1,3 +1,91 @@
+import requests
+
+from api import Cotoha
+from api import RequestsError
+from api import check_dic_class, check_sentence_class
+
+
+class CotohaParse(Cotoha):
+    """構文解析についてのクラス.
+
+    """
+
+    def __init__(self, sentence: str, sentence_class='default', dic_class=[]):
+        super().__init__()
+        self.sentence = sentence
+
+        if check_sentence_class(sentence_class):
+            self.sentence_class = sentence_class
+        else:
+            raise ParseError('sentence_classにエラーがあります.')
+
+        if check_dic_class(dic_class):
+            self.dic_class = dic_class
+        else:
+            raise ParseError('dic_classにエラーがあります.')
+
+        response_dict = self.get_response_dict()
+        self.message = response_dict['message']
+        self.parse_list = self.get_parse_list(response_dict['result'])
+        self.status = response_dict['status']
+
+    def __str__(self) -> str:
+        string = super().__str__()
+        string += 'sentence:{}\n'.format(self.sentence)
+        string += 'sentence_class:{}\n'.format(self.sentence_class)
+        string += 'dic_class:{}\n'.format(self.dic_class)
+        string += 'message:{}\n'.format(self.message)
+        string += 'status:{}\n'.format(self.status)
+        for parse in self.parse_list:
+            string += parse.__str__()
+        return string
+
+    def get_response_dict(self) -> dict:
+        """postを実行して,レスポンスを取得する.
+
+        Raises:
+            RequestsError: 通信エラーの場合.オフライン状態など.
+            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
+
+        Returns:
+            dict: レスポンスを取得する.
+        """
+        requests_json = {'sentence': self.sentence,
+                         'type': self.sentence_class,
+                         'dic_type': self.dic_class}
+        url = self.auth.base_url+'nlp/v1/parse'
+        try:
+            response_json = requests.post(url=url, json=requests_json,
+                                          headers=self.requests_headers).json()
+            if response_json['status'] == 0:
+                return response_json
+            else:
+                raise RequestsError('レスポンスエラー.')
+        except ConnectionError:
+            raise RequestsError('通信エラーです.')
+
+    def get_parse_list(self, result_list: list) -> list:
+        """response jsonからparse_listを取得する.
+
+        Args:
+            result_list (list): response jsonのresult項目のlist
+
+        Returns:
+            list: ParseInfoクラスのリスト.
+        """
+        parse_list = []
+        for result in result_list:
+            parse_list.append(ParseInfo(result))
+        return parse_list
+
+
+class ParseError(Exception):
+    """構文解析に関する例外クラス.
+    dic_classやsentence_classに関するエラーがある場合に呼ばれる.
+
+    """
+
+
 class ParseInfo(object):
     """構文解析結果についてのクラス.
 
@@ -101,3 +189,8 @@ class Dependency(object):
         string = 'token_id:{}\n'.format(self.token_id)
         string += 'label:{}\n'.format(self.label)
         return string
+
+
+if __name__ == '__main__':
+    cotoha_parse = CotohaParse('犬は歩く。')
+    print(cotoha_parse)

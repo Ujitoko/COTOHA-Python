@@ -21,6 +21,11 @@ class Cotoha(metaclass=ABCMeta):
 
     @abstractmethod
     def get_response_dict(self) -> dict:
+        """postを実行して,レスポンスを取得する.
+
+        Returns:
+            dict: レスポンスを取得する.
+        """
         pass
 
 
@@ -63,3 +68,11 @@ class RequestsError(Exception):
     通信エラーやAPIに関するエラーがある場合に呼ばれる.
 
     """
+
+
+if __name__ == "__main__":
+    assert check_dic_class(['IT', 'chemistry']), 'dic_class Error'
+    assert not(check_dic_class(['IT', 'A'])), 'dic_class Error'
+    assert check_sentence_class('default'), 'sentence_class Error'
+    assert check_sentence_class('kuzure'), 'sentence_class Error'
+    assert not(check_sentence_class('defualt')), 'sentence_class Error'

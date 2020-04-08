@@ -58,10 +58,10 @@ class CotohaNe(Cotoha):
                          'dic_type': self.dic_class}
         url = self.auth.base_url+'nlp/v1/ne'
         try:
-            response_json = requests.post(url=url, json=requests_json,
+            response_dict = requests.post(url=url, json=requests_json,
                                           headers=self.requests_headers).json()
-            if response_json['status'] == 0:
-                return response_json
+            if response_dict['status'] == 0:
+                return response_dict
             else:
                 raise RequestsError('レスポンスエラー.')
         except ConnectionError:

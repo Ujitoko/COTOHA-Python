@@ -6,7 +6,8 @@ from api import check_sentence_class
 
 
 class CotohaCoreference(Cotoha):
-    def __init__(self, document, sentence_class='default', do_segment=False):
+    def __init__(self, document: str, sentence_class='default',
+                 do_segment=False):
         super().__init__()
         self.document = document
         if check_sentence_class(sentence_class):

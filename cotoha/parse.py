@@ -1,7 +1,4 @@
-import requests
-
 from api import Cotoha
-from api import RequestsError
 from api import check_dic_class, check_sentence_class
 
 
@@ -24,10 +21,13 @@ class CotohaParse(Cotoha):
         else:
             raise ParseError('dic_classにエラーがあります.')
 
-        response_dict = self.get_response_dict()
+        request_json = {'sentence': self.sentence,
+                        'type': self.sentence_class,
+                        'dic_type': self.dic_class}
+        response_dict = self.get_response_dict(
+            relative_url='nlp/v1/parse', request_body=request_json)
         self.message = response_dict['message']
         self.status = response_dict['status']
-
         self.parse_result_list = []
         for result_dict in response_dict['result']:
             self.parse_result_list.append(ParseResult(result_dict))
@@ -42,30 +42,6 @@ class CotohaParse(Cotoha):
         for parse_result in self.parse_result_list:
             string += parse_result.__str__()
         return string
-
-    def get_response_dict(self) -> dict:
-        """postを実行して,レスポンスを取得する.
-
-        Raises:
-            RequestsError: 通信エラーの場合.オフライン状態など.
-            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
-
-        Returns:
-            dict: レスポンスを取得する.
-        """
-        requests_json = {'sentence': self.sentence,
-                         'type': self.sentence_class,
-                         'dic_type': self.dic_class}
-        url = self.auth.base_url+'nlp/v1/parse'
-        try:
-            response_dict = requests.post(url=url, json=requests_json,
-                                          headers=self.requests_headers).json()
-            if response_dict['status'] == 0:
-                return response_dict
-            else:
-                raise RequestsError('レスポンスエラー.')
-        except ConnectionError:
-            raise RequestsError('通信エラーです.')
 
 
 class ParseError(Exception):
@@ -82,14 +58,14 @@ class ParseResult(object):
 
     def __init__(self, result_dict: dict):
         self.chunk_info = ChunkInfo(result_dict['chunk_info'])
-        self.token_list = []
-        for result_token in result_dict['tokens']:
-            self.token_list.append(Token(result_token))
+        self.token_info_list = []
+        for token_result in result_dict['tokens']:
+            self.token_info_list.append(TokenInfo(token_result))
 
     def __str__(self) -> str:
         string = self.chunk_info.__str__()
-        for token in self.token_list:
-            string += token.__str__()
+        for token_info in self.token_info_list:
+            string += token_info.__str__()
         return string
 
 
@@ -104,9 +80,9 @@ class ChunkInfo(object):
         self.dep = chunk_dict['dep']
         self.chunk_head = chunk_dict['chunk_head']
         self.chunk_func = chunk_dict['chunk_func']
-        self.link_list = []
-        for result_link in chunk_dict['links']:
-            self.link_list.append(LinkInfo(result_link))
+        self.link_info_list = []
+        for link_result in chunk_dict['links']:
+            self.link_info_list.append(LinkInfo(link_result))
 
     def __str__(self) -> str:
         string = 'id:{}\n'.format(self.id)
@@ -114,8 +90,8 @@ class ChunkInfo(object):
         string += 'dep:{}\n'.format(self.dep)
         string += 'chunk_head:{}\n'.format(self.chunk_head)
         string += 'chunk_func:{}\n'.format(self.chunk_func)
-        for link in self.link_list:
-            string += link.__str__()
+        for link_info in self.link_info_list:
+            string += link_info.__str__()
         return string
 
 
@@ -134,7 +110,7 @@ class LinkInfo(object):
         return string
 
 
-class Token(object):
+class TokenInfo(object):
     """tokensのtokenに関するクラス.
 
     """
@@ -146,10 +122,11 @@ class Token(object):
         self.lemma = token_dict['lemma']
         self.pos = token_dict['pos']
         self.features = token_dict['features']
-        self.dependency_list = []
+        self.dependency_label_list = []
         if 'dependency_labels' in token_dict.keys():
             for dependency_label in token_dict['dependency_labels']:
-                self.dependency_list.append(Dependency(dependency_label))
+                self.dependency_label_list.append(
+                    DependencyLabel(dependency_label))
         self.attributes = token_dict['attributes']
 
     def __str__(self) -> str:
@@ -160,12 +137,12 @@ class Token(object):
         string += 'pos:{}\n'.format(self.pos)
         string += 'features:{}\n'.format(self.features)
         string += 'attributes:{}\n'.format(self.attributes)
-        for dependency_label in self.dependency_list:
+        for dependency_label in self.dependency_label_list:
             string += dependency_label.__str__()
         return string
 
 
-class Dependency(object):
+class DependencyLabel(object):
     """tokenのDependency_labelsに関するクラス.
 
     """

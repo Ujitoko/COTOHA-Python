@@ -1,7 +1,4 @@
-import requests
-
 from api import Cotoha
-from api import RequestsError
 from api import check_dic_class, check_sentence_class
 
 
@@ -24,7 +21,11 @@ class CotohaNe(Cotoha):
         else:
             raise NeError('dic_classにエラーがあります.')
 
-        response_dict = self.get_response_dict()
+        request_json = {'sentence': self.sentence,
+                        'type': self.sentence_class,
+                        'dic_type': self.dic_class}
+        response_dict = self.get_response_dict(
+            relative_url='nlp/v1/ne', request_body=request_json)
         self.message = response_dict['message']
         self.status = response_dict['status']
 
@@ -42,30 +43,6 @@ class CotohaNe(Cotoha):
         for ne_result in self.ne_result_list:
             string += ne_result.__str__()
         return string
-
-    def get_response_dict(self) -> dict:
-        """postを実行して,レスポンスを取得する.
-
-        Raises:
-            RequestsError: 通信エラーの場合.オフライン状態など.
-            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
-
-        Returns:
-            dict: レスポンスを取得する.
-        """
-        requests_json = {'sentence': self.sentence,
-                         'type': self.sentence_class,
-                         'dic_type': self.dic_class}
-        url = self.auth.base_url+'nlp/v1/ne'
-        try:
-            response_dict = requests.post(url=url, json=requests_json,
-                                          headers=self.requests_headers).json()
-            if response_dict['status'] == 0:
-                return response_dict
-            else:
-                raise RequestsError('レスポンスエラー.')
-        except ConnectionError:
-            raise RequestsError('通信エラーです.')
 
 
 class NeError(Exception):

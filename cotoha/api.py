@@ -1,4 +1,6 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
+
+import requests
 
 from auth import Auth
 
@@ -19,14 +21,31 @@ class Cotoha(metaclass=ABCMeta):
         string += 'requests_headers:{}\n'.format(self.requests_headers)
         return string
 
-    @abstractmethod
-    def get_response_dict(self) -> dict:
+    def get_response_dict(self, relative_url: str,
+                          request_body: dict) -> dict:
         """postを実行して,レスポンスを取得する.
+
+        Args:
+            relative_url (str): Base URLからの相対パス.
+            requests_json (dict): リクエストボディ.
+
+        Raises:
+            RequestsError: 通信エラーの場合.オフライン状態など.
+            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
 
         Returns:
             dict: レスポンスを取得する.
         """
-        pass
+        url = self.auth.base_url+relative_url
+        try:
+            response_dict = requests.post(url=url, json=request_body,
+                                          headers=self.requests_headers).json()
+            if response_dict['status'] == 0:
+                return response_dict
+            else:
+                raise RequestsError('レスポンスエラー.')
+        except ConnectionError:
+            raise RequestsError('通信エラーです.')
 
 
 def check_dic_class(dic_class_list: list) -> bool:

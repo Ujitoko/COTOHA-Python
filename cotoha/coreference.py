@@ -1,7 +1,4 @@
-import requests
-
 from api import Cotoha
-from api import RequestsError
 from api import check_sentence_class
 
 
@@ -23,7 +20,11 @@ class CotohaCoreference(Cotoha):
         if type(self.document) == list:
             self.do_segment = False
 
-        response_dict = self.get_response_dict()
+        request_json = {'document': self.document,
+                        'type': self.sentence_class,
+                        'do_segment': self.do_segment}
+        response_dict = self.get_response_dict(
+            relative_url='nlp/v1/coreference', request_body=request_json)
         self.message = response_dict['message']
         self.coreference_result = CoreferenceResult(response_dict['result'])
         self.status = response_dict['status']
@@ -37,30 +38,6 @@ class CotohaCoreference(Cotoha):
         string += 'status:{}\n'.format(self.status)
         string += self.coreference_result.__str__()
         return string
-
-    def get_response_dict(self) -> dict:
-        """postを実行して,レスポンスを取得する.
-
-        Raises:
-            RequestsError: 通信エラーの場合.オフライン状態など.
-            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
-
-        Returns:
-            dict: レスポンスを取得する.
-        """
-        requests_json = {'document': self.document,
-                         'type': self.sentence_class,
-                         'do_segment': self.do_segment}
-        url = self.auth.base_url+'nlp/v1/coreference'
-        try:
-            response_dict = requests.post(url=url, json=requests_json,
-                                          headers=self.requests_headers).json()
-            if response_dict['status'] == 0:
-                return response_dict
-            else:
-                raise RequestsError('レスポンスエラー.')
-        except ConnectionError:
-            raise RequestsError('通信エラーです.')
 
 
 class CoreferenceError(Exception):
@@ -77,12 +54,13 @@ class CoreferenceResult(object):
 
     def __init__(self, result_dict: dict):
         self.coreference_info_list = []
-        for result in result_dict['coreference']:
-            self.coreference_info_list.append(CoreferenceInfo(result))
+        for coreference_result in result_dict['coreference']:
+            self.coreference_info_list.append(
+                CoreferenceInfo(coreference_result))
 
         self.token_list = []
-        for token in result_dict['tokens']:
-            self.token_list.append(token)
+        for token_result in result_dict['tokens']:
+            self.token_list.append(token_result)
 
     def __str__(self) -> str:
         string = ''
@@ -103,8 +81,8 @@ class CoreferenceInfo(object):
         self.representative_id = result_dict['representative_id']
 
         self.referent_info_list = []
-        for result in result_dict['referents']:
-            self.referent_info_list.append(ReferentInfo(result))
+        for referent_result in result_dict['referents']:
+            self.referent_info_list.append(ReferentInfo(referent_result))
 
     def __str__(self) -> str:
         string = 'representative_id:{}\n'.format(self.representative_id)

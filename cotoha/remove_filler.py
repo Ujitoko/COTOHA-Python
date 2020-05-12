@@ -1,7 +1,4 @@
-import requests
-
 from api import Cotoha
-from api import RequestsError
 
 
 class CotohaRemoveFiller(Cotoha):
@@ -14,7 +11,10 @@ class CotohaRemoveFiller(Cotoha):
         self.text = text
         self.do_segment = do_segment
 
-        response_dict = self.get_response_dict()
+        request_json = {'text': self.text,
+                        'do_segment': self.do_segment}
+        response_dict = self.get_response_dict(
+            relative_url='nlp/beta/remove_filler', request_body=request_json)
         self.message = response_dict['message']
         self.status = response_dict['status']
 
@@ -33,29 +33,6 @@ class CotohaRemoveFiller(Cotoha):
             string += remove_filler_result.__str__()
         return string
 
-    def get_response_dict(self) -> dict:
-        """postを実行して,レスポンスを取得する.
-
-        Raises:
-            RequestsError: 通信エラーの場合.オフライン状態など.
-            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
-
-        Returns:
-            dict: レスポンスを取得する.
-        """
-        requests_json = {'text': self.text,
-                         'do_segment': self.do_segment}
-        url = self.auth.base_url+'nlp/beta/remove_filler'
-        try:
-            response_dict = requests.post(url=url, json=requests_json,
-                                          headers=self.requests_headers).json()
-            if response_dict['status'] == 0:
-                return response_dict
-            else:
-                raise RequestsError('レスポンスエラー.')
-        except ConnectionError:
-            raise RequestsError('通信エラーです.')
-
 
 class RemoveFillerResult(object):
     """言い淀み除去の結果に関するクラス.
@@ -64,8 +41,8 @@ class RemoveFillerResult(object):
 
     def __init__(self, result_dict: dict):
         self.filler_info_list = []
-        for result_filler in result_dict['fillers']:
-            self.filler_info_list.append(FillerInfo(result_filler))
+        for filler_result in result_dict['fillers']:
+            self.filler_info_list.append(FillerInfo(filler_result))
         self.normalized_sentence = result_dict['normalized_sentence']
         self.fixed_sentence = result_dict['fixed_sentence']
 

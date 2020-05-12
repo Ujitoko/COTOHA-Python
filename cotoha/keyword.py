@@ -1,7 +1,4 @@
-import requests
-
 from api import Cotoha
-from api import RequestsError
 from api import check_sentence_class, check_dic_class
 
 
@@ -33,7 +30,13 @@ class CotohaKeyword(Cotoha):
         else:
             raise KeywordError('dic_classにエラーがあります.')
 
-        response_dict = self.get_response_dict()
+        request_json = {'document': self.document,
+                        'type': self.sentence_class,
+                        'do_segment': self.do_segment,
+                        'max_keyword_num': self.max_keyword_num,
+                        'dic_type': self.dic_class}
+        response_dict = self.get_response_dict(
+            relative_url='nlp/v1/keyword', request_body=request_json)
         self.message = response_dict['message']
         self.status = response_dict['status']
 
@@ -53,32 +56,6 @@ class CotohaKeyword(Cotoha):
         for keyword_result in self.keyword_result_list:
             string += keyword_result.__str__()
         return string
-
-    def get_response_dict(self) -> dict:
-        """postを実行して,レスポンスを取得する.
-
-        Raises:
-            RequestsError: 通信エラーの場合.オフライン状態など.
-            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
-
-        Returns:
-            dict: レスポンスを取得する.
-        """
-        requests_json = {'document': self.document,
-                         'type': self.sentence_class,
-                         'do_segment': self.do_segment,
-                         'max_keyword_num': self.max_keyword_num,
-                         'dic_type': self.dic_class}
-        url = self.auth.base_url+'nlp/v1/keyword'
-        try:
-            response_dict = requests.post(url=url, json=requests_json,
-                                          headers=self.requests_headers).json()
-            if response_dict['status'] == 0:
-                return response_dict
-            else:
-                raise RequestsError('レスポンスエラー.')
-        except ConnectionError:
-            raise RequestsError('通信エラーです.')
 
 
 class KeywordError(Exception):

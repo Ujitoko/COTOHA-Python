@@ -1,7 +1,4 @@
-import requests
-
 from api import Cotoha
-from api import RequestsError
 from api import check_sentence_class
 
 
@@ -23,7 +20,11 @@ class CotohaUserAttribute(Cotoha):
         if type(self.document) == list:
             self.do_segment = False
 
-        response_dict = self.get_response_dict()
+        request_json = {'document': self.document,
+                        'type': self.sentence_class,
+                        'do_segment': self.do_segment}
+        response_dict = self.get_response_dict(
+            relative_url='nlp/beta/user_attribute', request_body=request_json)
         self.message = response_dict['message']
         self.user_attribute_result = UserAttributeResult(
             response_dict['result'])
@@ -38,30 +39,6 @@ class CotohaUserAttribute(Cotoha):
         string += 'status:{}\n'.format(self.status)
         string += self.user_attribute_result.__str__()
         return string
-
-    def get_response_dict(self) -> dict:
-        """postを実行して,レスポンスを取得する.
-
-        Raises:
-            RequestsError: 通信エラーの場合.オフライン状態など.
-            RequestsError: レスポンスエラー.アクセストークンが間違っている場合など.
-
-        Returns:
-            dict: レスポンスを取得する.
-        """
-        requests_json = {'document': self.document,
-                         'type': self.sentence_class,
-                         'do_segment': self.do_segment}
-        url = self.auth.base_url+'nlp/beta/user_attribute'
-        try:
-            response_dict = requests.post(url=url, json=requests_json,
-                                          headers=self.requests_headers).json()
-            if response_dict['status'] == 0:
-                return response_dict
-            else:
-                raise RequestsError('レスポンスエラー.')
-        except ConnectionError:
-            raise RequestsError('通信エラーです.')
 
 
 class UserAttributeError(Exception):

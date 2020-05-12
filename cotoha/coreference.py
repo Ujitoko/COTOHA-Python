@@ -6,6 +6,10 @@ from api import check_sentence_class
 
 
 class CotohaCoreference(Cotoha):
+    """照応解析についてのクラス.
+
+    """
+
     def __init__(self, document: str, sentence_class='default',
                  do_segment=False):
         super().__init__()

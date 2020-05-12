@@ -83,8 +83,8 @@ class ParseResult(object):
     def __init__(self, result_dict: dict):
         self.chunk_info = ChunkInfo(result_dict['chunk_info'])
         self.token_list = []
-        for result in result_dict['tokens']:
-            self.token_list.append(Token(result))
+        for result_token in result_dict['tokens']:
+            self.token_list.append(Token(result_token))
 
     def __str__(self) -> str:
         string = self.chunk_info.__str__()
@@ -105,8 +105,8 @@ class ChunkInfo(object):
         self.chunk_head = chunk_dict['chunk_head']
         self.chunk_func = chunk_dict['chunk_func']
         self.link_list = []
-        for link in chunk_dict['links']:
-            self.link_list.append(LinkInfo(link))
+        for result_link in chunk_dict['links']:
+            self.link_list.append(LinkInfo(result_link))
 
     def __str__(self) -> str:
         string = 'id:{}\n'.format(self.id)

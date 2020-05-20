@@ -37,6 +37,7 @@ class Auth(object):
         string = 'base_url:{}\n'.format(self.base_url)
         string += 'limit_time:{}\n'.format(self.limit_time)
         string += 'token:{}\n'.format(self.token)
+        string += 'abspath:{}\n'.format(self.abspath)
         return string
 
     def check_token(self) -> bool:

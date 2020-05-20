@@ -1,4 +1,4 @@
-from api import Cotoha
+from cotoha.api import Cotoha
 
 
 class CotohaRemoveFiller(Cotoha):
@@ -7,6 +7,11 @@ class CotohaRemoveFiller(Cotoha):
     """
 
     def __init__(self, text: str, do_segment=False):
+        """
+        Args:
+            text (str): 解析対象文.
+            do_segment (bool, optional): 文区切りをするかどうか. Defaults to False.
+        """
         super().__init__()
         self.text = text
         self.do_segment = do_segment
@@ -69,9 +74,3 @@ class FillerInfo(object):
         string += 'end_pos:{}\n'.format(self.end_pos)
         string += 'form:{}\n'.format(self.form)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_remove_filler = CotohaRemoveFiller(
-        'えーーっと、あの、今日の打ち合わせでしたっけ。すみません、ちょっと、急用が入ってしまって。', do_segment=True)
-    print(cotoha_remove_filler)

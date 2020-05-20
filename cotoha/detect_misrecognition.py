@@ -1,4 +1,4 @@
-from api import Cotoha
+from cotoha.api import Cotoha
 
 
 class CotohaDetectMisrecognition(Cotoha):
@@ -7,6 +7,10 @@ class CotohaDetectMisrecognition(Cotoha):
     """
 
     def __init__(self, sentence: str):
+        """
+        Args:
+            sentence (str): 解析対象文.
+        """
         super().__init__()
         self.sentence = sentence
 
@@ -83,8 +87,3 @@ class CorrectionInfo(object):
         string = 'form:{}\n'.format(self.form)
         string += 'correct_score:{}\n'.format(self.correct_score)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_detect_misrecognition = CotohaDetectMisrecognition('温泉認識は誤りを起こす')
-    print(cotoha_detect_misrecognition)

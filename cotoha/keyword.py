@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_sentence_class, check_dic_class
+from cotoha.api import Cotoha
+from cotoha.api import get_sentence_class, check_dic_class
 
 
 class CotohaKeyword(Cotoha):
@@ -7,14 +7,22 @@ class CotohaKeyword(Cotoha):
 
     """
 
-    def __init__(self, document: str, sentence_class='default',
+    def __init__(self, document: str, kuzure_flag=False,
                  do_segment=False, max_keyword_num=5, dic_class=[]):
+        """
+        Args:
+            document (str): 解析対象文.
+            sentence_class (str, optional): 崩れ文かどうか. Defaults to 'default'.
+            do_segment (bool, optional): 文区切りするかどうか. Defaults to False.
+            max_keyword_num (int, optional): 抽出する単語上限. Defaults to 5.
+            dic_class (list, optional): 専門用語辞書. Defaults to [].
+
+        Raises:
+            KeywordError: dic_classにエラーがある場合.
+        """
         super().__init__()
         self.document = document
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise KeywordError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         self.do_segment = do_segment
         if type(self.document) == list:
@@ -78,9 +86,3 @@ class KeywordResult(object):
         string = 'form:{}\n'.format(self.form)
         string += 'score:{}\n'.format(self.score)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_keyword = CotohaKeyword('レストランで昼食を食べた。', do_segment=True,
-                                   max_keyword_num=2)
-    print(cotoha_keyword)

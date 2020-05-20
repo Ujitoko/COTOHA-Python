@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_sentence_class
+from cotoha.api import Cotoha
+from cotoha.api import get_sentence_class
 
 
 class CotohaSentenceType(Cotoha):
@@ -7,14 +7,19 @@ class CotohaSentenceType(Cotoha):
 
     """
 
-    def __init__(self, sentence: str, sentence_class='default'):
+    def __init__(self, sentence: str, kuzure_flag=False):
+        """
+        Args:
+            sentence (str): 解析対象文.
+            kuzure_flag (bool, optional): 崩れ文かどうか. Defaults to False.
+
+        Raises:
+            SentenceTypeError: dic_classにエラーがあります.
+        """
         super().__init__()
         self.sentence = sentence
 
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise SentenceTypeError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         request_json = {'sentence': self.sentence,
                         'type': self.sentence_class,
@@ -55,8 +60,3 @@ class SentenceTypeResult(object):
         string = 'modality:{}\n'.format(self.modality)
         string += 'dialog_act_list:{}\n'.format(self.dialog_act_list)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_sentence_type = CotohaSentenceType('あなたの名前は何ですか？')
-    print(cotoha_sentence_type)

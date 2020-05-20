@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_sentence_class
+from cotoha.api import Cotoha
+from cotoha.api import get_sentence_class
 
 
 class CotohaCoreference(Cotoha):
@@ -7,14 +7,17 @@ class CotohaCoreference(Cotoha):
 
     """
 
-    def __init__(self, document: str, sentence_class='default',
+    def __init__(self, document: str, kuzure_flag=False,
                  do_segment=False):
+        """
+        Args:
+            document (str): 解析対象文.
+            kuzure_flag (bool, optional): 崩れ文かどうか. Defaults to False.
+            do_segment (bool, optional): 文区切りをするかどうか. Defaults to False.
+        """
         super().__init__()
         self.document = document
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise CoreferenceError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         self.do_segment = do_segment
         if type(self.document) == list:
@@ -108,8 +111,3 @@ class ReferentInfo(object):
         string += 'token_id_from:{}\n'.format(self.token_id_from)
         string += 'token_id_to:{}\n'.format(self.token_id_to)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_coreference = CotohaCoreference('太郎は友人です。彼は焼肉を食べた。')
-    print(cotoha_coreference)

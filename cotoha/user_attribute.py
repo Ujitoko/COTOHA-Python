@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_sentence_class
+from cotoha.api import Cotoha
+from cotoha.api import get_sentence_class
 
 
 class CotohaUserAttribute(Cotoha):
@@ -7,14 +7,17 @@ class CotohaUserAttribute(Cotoha):
 
     """
 
-    def __init__(self, document: str, sentence_class='default',
+    def __init__(self, document: str, kuzure_flag=False,
                  do_segment=False):
+        """
+        Args:
+            document (str): 解析対象文.
+            sentence_class (bool, optional): 崩れ文かどうか. Defaults to False.
+            do_segment (bool, optional): 文区切りをするかどうか. Defaults to False.
+        """
         super().__init__()
         self.document = document
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise UserAttributeError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         self.do_segment = do_segment
         if type(self.document) == list:
@@ -129,9 +132,3 @@ class UserAttributeResult(object):
         string += 'occupation:{}\n'.format(self.occupation)
         string += 'position:{}\n'.format(self.position)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_user_attribute = CotohaUserAttribute(
-        '私は昨日田町駅で飲みに行ったら奥さんに怒られた。', do_segment=True)
-    print(cotoha_user_attribute)

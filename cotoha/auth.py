@@ -16,8 +16,9 @@ class Auth(object):
         self.base_url = 'https://api.ce-cotoha.com/api/dev/'
         self.limit_time = 0
         self.token = ''
-        if os.path.exists('./json/access.json'):
-            with open('./json/access.json', 'r', encoding='utf-8') as rf:
+        self.abspath = os.path.abspath('.')+'/cotoha/json/'
+        if os.path.exists(self.abspath+'access.json'):
+            with open(self.abspath+'access.json', 'r', encoding='utf-8') as rf:
                 try:
                     access_json = json.load(rf)
                     self.token = access_json['access_token']
@@ -33,11 +34,6 @@ class Auth(object):
             self.update_token()
 
     def __str__(self) -> str:
-        """クラスの概要を文字列で返す.
-
-        Returns:
-            str: クラス概要.
-        """
         string = 'base_url:{}\n'.format(self.base_url)
         string += 'limit_time:{}\n'.format(self.limit_time)
         string += 'token:{}\n'.format(self.token)
@@ -65,8 +61,8 @@ class Auth(object):
             AuthError: client.jsonに問題がある場合.keyが間違っている場合など.
             AuthError: client.jsonが存在しない場合.
         """
-        if os.path.exists('./json/client.json'):
-            with open('./json/client.json', 'r', encoding='utf-8') as rf:
+        if os.path.exists(self.abspath+'client.json'):
+            with open(self.abspath+'client.json', 'r', encoding='utf-8') as rf:
                 try:
                     requests_json = json.load(rf)
                     publish_url = requests_json.pop('publish_url')
@@ -87,7 +83,8 @@ class Auth(object):
                     raise AuthError('client.jsonに問題があります.')
         else:
             raise AuthError('client.jsonが存在しません.')
-        with open('./json/access.json', mode='w', encoding='utf-8') as wf:
+        with open(self.abspath+'access.json',
+                  mode='w', encoding='utf-8') as wf:
             access_json = {}
             access_json['access_token'] = self.token
             access_json['limit_time'] = self.limit_time
@@ -99,8 +96,3 @@ class AuthError(Exception):
     通信エラーやclient.jsonに不備がある場合に呼ばれる.
 
     """
-
-
-if __name__ == '__main__':
-    auth = Auth()
-    print(auth)

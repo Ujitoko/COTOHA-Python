@@ -1,4 +1,4 @@
-from api import Cotoha
+from cotoha.api import Cotoha
 
 
 class CotohaSummary(Cotoha):
@@ -7,6 +7,15 @@ class CotohaSummary(Cotoha):
     """
 
     def __init__(self, document: str, sent_len: int):
+        """
+        Args:
+            document (str): 要約対象文.5文字から5000文字まで.
+            sent_len (int): 要約文数.1文から100文まで.
+
+        Raises:
+            SummaryError: 入力文章サイズが適していません.
+            SummaryError: 要約文数が適していません.
+        """
         super().__init__()
         if (5 <= len(document))and(len(document) <= 5000):
             self.document = document
@@ -41,14 +50,3 @@ class SummaryError(Exception):
     入力パラメータに関するエラーがある場合に呼ばれる.
 
     """
-
-
-if __name__ == '__main__':
-    document = '''
-    前線が太平洋上に停滞しています。
-    一方、高気圧が千島近海にあって、北日本から東日本をゆるやかに覆っています。
-    関東地方は、晴れ時々曇り、ところにより雨となっています。
-    東京は、湿った空気や前線の影響により、晴れ後曇りで、夜は雨となるでしょう。
-    '''
-    cotoha_summary = CotohaSummary(document=document, sent_len=1)
-    print(cotoha_summary)

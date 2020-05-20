@@ -2,7 +2,7 @@ from abc import ABCMeta
 
 import requests
 
-from auth import Auth
+from cotoha.auth import Auth
 
 
 class Cotoha(metaclass=ABCMeta):
@@ -67,19 +67,19 @@ def check_dic_class(dic_class_list: list) -> bool:
     return True
 
 
-def check_sentence_class(sentence_class: str) -> bool:
-    """sentence_classが正当かどうか確認する.
+def get_sentence_class(kuzure_flag: bool) -> str:
+    """kuzure_flagによってsentence_classを返す.
 
     Args:
-        sentence_class (str): __init__の引数,sentence_class.
+        kuzure_flag (bool): 崩れ文かどうか.
 
     Returns:
-        bool: sentence_classがdefaultかkuzureの場合True,他はFalse.
+        str: kuzure_flagがTrueの場合はkuzure,Falseの場合はdefault.
     """
-    if (sentence_class == 'default')or(sentence_class == 'kuzure'):
-        return True
+    if (kuzure_flag):
+        return 'kuzure'
     else:
-        return False
+        return 'default'
 
 
 class RequestsError(Exception):
@@ -87,11 +87,3 @@ class RequestsError(Exception):
     通信エラーやAPIに関するエラーがある場合に呼ばれる.
 
     """
-
-
-if __name__ == "__main__":
-    assert check_dic_class(['IT', 'chemistry']), 'dic_class Error'
-    assert not(check_dic_class(['IT', 'A'])), 'dic_class Error'
-    assert check_sentence_class('default'), 'sentence_class Error'
-    assert check_sentence_class('kuzure'), 'sentence_class Error'
-    assert not(check_sentence_class('defualt')), 'sentence_class Error'

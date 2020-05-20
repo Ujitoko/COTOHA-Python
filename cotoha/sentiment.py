@@ -1,4 +1,4 @@
-from api import Cotoha
+from cotoha.api import Cotoha
 
 
 class CotohaSentiment(Cotoha):
@@ -7,6 +7,10 @@ class CotohaSentiment(Cotoha):
     """
 
     def __init__(self, sentence: str):
+        """
+        Args:
+            sentence (str): 解析対象文.
+        """
         super().__init__()
         self.sentence = sentence
 
@@ -61,8 +65,3 @@ class EmotionalPhrase(object):
         string = 'form:{}\n'.format(self.form)
         string += 'emotion:{}\n'.format(self.emotion)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_sentiment = CotohaSentiment('人生の春を謳歌しています')
-    print(cotoha_sentiment)

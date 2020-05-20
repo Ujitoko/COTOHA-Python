@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_dic_class, check_sentence_class
+from cotoha.api import Cotoha
+from cotoha.api import check_dic_class, get_sentence_class
 
 
 class CotohaNe(Cotoha):
@@ -7,14 +7,19 @@ class CotohaNe(Cotoha):
 
     """
 
-    def __init__(self, sentence: str, sentence_class='default', dic_class=[]):
+    def __init__(self, sentence: str, kuzure_flag=False, dic_class=[]):
+        """
+        Args:
+            sentence (str): 解析対象文.
+            sentence_class (bool, optional): 崩れ文かどうか. Defaults to False.
+            dic_class (list, optional): 専門用語辞書. Defaults to [].
+
+        Raises:
+            NeError: dic_classにエラーがある場合.
+        """
         super().__init__()
         self.sentence = sentence
-
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise NeError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         if check_dic_class(dic_class):
             self.dic_class = dic_class
@@ -75,8 +80,3 @@ class NeResult(object):
         string += 'extended_class:{}\n'.format(self.extended_class)
         string += 'source:{}\n'.format(self.source)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_ne = CotohaNe('昨日は東京駅を利用した。')
-    print(cotoha_ne)

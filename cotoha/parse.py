@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_dic_class, check_sentence_class
+from cotoha.api import Cotoha
+from cotoha.api import check_dic_class, get_sentence_class
 
 
 class CotohaParse(Cotoha):
@@ -7,14 +7,19 @@ class CotohaParse(Cotoha):
 
     """
 
-    def __init__(self, sentence: str, sentence_class='default', dic_class=[]):
+    def __init__(self, sentence: str, kuzure_flag=False, dic_class=[]):
+        """
+        Args:
+            sentence (str): 解析対象文.
+            sentence_class (bool, optional): 崩れ文かどうか. Defaults to False.
+            dic_class (list, optional): 専門用語辞書. Defaults to [].
+
+        Raises:
+            ParseError: dic_classにエラーがある場合.
+        """
         super().__init__()
         self.sentence = sentence
-
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise ParseError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         if check_dic_class(dic_class):
             self.dic_class = dic_class
@@ -155,8 +160,3 @@ class DependencyLabel(object):
         string = 'token_id:{}\n'.format(self.token_id)
         string += 'label:{}\n'.format(self.label)
         return string
-
-
-if __name__ == '__main__':
-    cotoha_parse = CotohaParse('犬は歩く。')
-    print(cotoha_parse)

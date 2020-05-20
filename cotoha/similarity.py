@@ -1,5 +1,5 @@
-from api import Cotoha
-from api import check_sentence_class, check_dic_class
+from cotoha.api import Cotoha
+from cotoha.api import get_sentence_class, check_dic_class
 
 
 class CotohaSimilarity(Cotoha):
@@ -8,14 +8,21 @@ class CotohaSimilarity(Cotoha):
     """
 
     def __init__(self, s1: str, s2: str,
-                 sentence_class='default', dic_class=[]):
+                 kuzure_flag=False, dic_class=[]):
+        """
+        Args:
+            s1 (str): 解析対象文1.
+            s2 (str): 解析対象文2.
+            kuzure_flag (bool, optional): 崩れ文かどうか. Defaults to False.
+            dic_class (list, optional): 専門用語辞書. Defaults to [].
+
+        Raises:
+            SimilarityError: dic_classにエラーがあります.
+        """
         super().__init__()
         self.s1 = s1
         self.s2 = s2
-        if check_sentence_class(sentence_class):
-            self.sentence_class = sentence_class
-        else:
-            raise SimilarityError('sentence_classにエラーがあります.')
+        self.sentence_class = get_sentence_class(kuzure_flag)
 
         if check_dic_class(dic_class):
             self.dic_class = dic_class
@@ -61,9 +68,3 @@ class SimilarityResult(object):
 
     def __str__(self) -> str:
         return 'score:{}\n'.format(self.score)
-
-
-if __name__ == '__main__':
-    cotoha_similarity = CotohaSimilarity(
-        '近くのレストランはどこですか？', 'このあたりの定食屋はどこにありますか？')
-    print(cotoha_similarity)
